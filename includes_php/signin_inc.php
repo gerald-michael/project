@@ -1,11 +1,9 @@
 <?php
 
-session_start();
-
 if (isset($_POST["submit"])) {
     include 'connect.php';
-    $password = mysqli_real_escape_string($conn, $_POST["password"]);
-    $username = mysqli_real_escape_string($conn, $_POST["username"]);
+    $password = $_POST["password"];
+    $username = $_POST["username"];
 
     //error handlers
     //check if inputs are empty
@@ -13,29 +11,33 @@ if (isset($_POST["submit"])) {
         header("Location:../index.php?signin=empty");
         exit();
     } else {
-        $sql = "SELECT * FROM tenant WHERE username = '$username';";
-        $result = mysqli_query($conn, $sql);
-        $resultCheck = mysqli_num_rows($result);
-        if ($resultCheck < 1) {
-            header("Location:../index.php?signin=error");
+        $sql = "SELECT * FROM user WHERE username = ?;";
+        $stmt = mysqli_stmt_init($conn);
+        if (!mysqli_stmt_prepare($stmt, $sql)) {
+            header("Location:../index.php?signin=sqlerror");
             exit();
         } else {
+            mysqli_stmt_bind_param($stmt, 's', $username);
+            mysqli_stmt_execute($stmt);
+            $result = mysqli_stmt_get_result($stmt);
             if ($row = mysqli_fetch_assoc($result)) {
-                //deharshing password
-                $harsedpwdcheck = password_verify($pwd, $row['password']);
-                if ($harsedpwdcheck == false) {
-                    header("Location:../index.php?signin=error3");
+                $passwordChk = password_verify($password, $row['password']);
+                if ($passwordChk == false) {
+                    header("Location:../index.php?signin=error");
                     exit();
-                } elseif ($harsedpwdcheck == true) {
-                    //login user
+                } elseif ($passwordChk == true) {
+                    session_start();
                     $_SESSION['username'] = $row['username'];
-                    $_SESSION['firstName'] = $row['firstName'];
-                    $_SESSION['lastName'] = $row['lastName'];
-                    $_SESSION['email'] = $row['email'];
-                    $_SESSION['tenantId'] = $row['tenantId'];
-                    header("Location:../index.php?signin=success");
+                    $_SESSION['email'] = $row['username'];
+                    header("Location:../index.php?signin=succes");
+                    exit();
+                } else {
+                    header("Location:../index.php?signin=error");
                     exit();
                 }
+            } else {
+                header("Location:../index.php?signin=error");
+                exit();
             }
         }
     }

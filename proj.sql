@@ -7,21 +7,19 @@ CREATE TABLE property
     location VARCHAR(255),
     cost INT
 );
-CREATE TABLE tenant
+CREATE TABLE user
 (
-    tenantId INT(11) PRIMARY KEY NOT NULL
+    userId INT(11) PRIMARY KEY NOT NULL
     AUTO_INCREMENT,
     firstName VARCHAR
-    (25) NOT NULL,
+    (256) NOT NULL,
     lastName VARCHAR
-    (25) NOT NULL,
-    nin VARCHAR
-    (40) ,
+    (256) NOT NULL,
     email VARCHAR
-    (40) NOT NULL,
+    (256) NOT NULL,
     password LONGTEXT NOT NULL,
     username VARCHAR
-    (40) NOT NULL
+    (256) NOT NULL UNIQUE
 );
 
     CREATE TABLE maintance
